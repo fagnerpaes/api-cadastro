@@ -1218,14 +1218,14 @@ Informar limitações, decisões técnicas ou pontos de atenção.
 
 ## 18. Checklist final
 
-- [ ] repositório criado no GitHub
-- [ ] estrutura inicial do projeto publicada
-- [ ] ambiente validado
-- [ ] Express configurado
-- [ ] Mocha configurado
-- [ ] Supertest configurado
-- [ ] Swagger configurado
-- [ ] user stories registradas em Issues
+- [x] repositório criado no GitHub
+- [x] estrutura inicial do projeto publicada
+- [x] ambiente validado
+- [x] Express configurado
+- [x] Mocha configurado
+- [x] Supertest configurado
+- [x] Swagger configurado
+- [x] user stories registradas em Issues no Github
 - [ ] endpoint `POST /products` implementado
 - [ ] regras de negócio implementadas
 - [ ] persistência em memória funcionando
