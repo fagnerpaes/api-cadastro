@@ -1226,13 +1226,13 @@ Informar limitações, decisões técnicas ou pontos de atenção.
 - [x] Supertest configurado
 - [x] Swagger configurado
 - [x] user stories registradas em Issues no Github
+- [x] MCP apoiando a leitura das Issues e o fluxo de desenvolvimento
 - [ ] endpoint `POST /products` implementado
 - [ ] regras de negócio implementadas
 - [ ] persistência em memória funcionando
 - [ ] testes automatizados passando
 - [ ] Swagger coerente com a API
 - [ ] README atualizado
-- [ ] MCP apoiando a leitura das Issues e o fluxo de desenvolvimento
 - [ ] revisão final concluída
 - [ ] repositório pronto para entrega
 
