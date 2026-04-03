@@ -1227,11 +1227,16 @@ Informar limitações, decisões técnicas ou pontos de atenção.
 - [x] Swagger configurado
 - [x] user stories registradas em Issues no Github
 - [x] MCP apoiando a leitura das Issues e o fluxo de desenvolvimento
-- [ ] endpoint `POST /products` implementado
+- [ ] Revisar User Stories/Critérios de aceite no Git
+- [ ] Criar um Swagger inicial
+- [ ] Criar o prompt para geração API de Produtos Endpoint `POST /products` implementado
 - [ ] regras de negócio implementadas
 - [ ] persistência em memória funcionando
-- [ ] testes automatizados passando
-- [ ] Swagger coerente com a API
+- [ ] Revisão Swagger coerente com a API
+- [ ] Criar o prompt para criação de Casos de Testes/Cenários
+- [ ] Criar o prompt para criação do scripts de testes em mocha e supertest
+- [ ] Testes automatizados passando
+- [ ] Revisão Swagger coerente com a API
 - [ ] README atualizado
 - [ ] revisão final concluída
 - [ ] repositório pronto para entrega
