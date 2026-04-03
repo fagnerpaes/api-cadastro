@@ -67,6 +67,7 @@ Esse domínio foi escolhido porque permite:
 
 ### Campos propostos
 
+- 'id'
 - `name`
 - `price`
 - `quantity`
