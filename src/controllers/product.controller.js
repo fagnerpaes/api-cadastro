@@ -114,6 +114,52 @@ const updateProduct = (req, res) => {
 };
 
 /**
+ * PATCH /products/:id - Atualiza parcialmente um produto existente
+ */
+const patchProduct = (req, res) => {
+  try {
+    const { id } = req.params;
+    const productData = {};
+
+    // Apenas incluir campos que foram enviados
+    if (req.body.name !== undefined) productData.name = req.body.name;
+    if (req.body.price !== undefined) productData.price = parseFloat(req.body.price);
+    if (req.body.quantity !== undefined) productData.quantity = parseInt(req.body.quantity);
+    if (req.body.category !== undefined) productData.category = req.body.category;
+
+    // Se nenhum campo foi enviado, retornar erro
+    if (Object.keys(productData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one field must be provided for update'
+      });
+    }
+
+    const product = productService.updateProduct(id, productData);
+
+    res.status(200).json({
+      success: true,
+      message: 'Product updated successfully',
+      data: product
+    });
+  } catch (error) {
+    if (error.message.includes('not found')) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found',
+        error: error.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Error updating product',
+        error: error.message
+      });
+    }
+  }
+};
+
+/**
  * DELETE /products/:id - Deleta um produto
  */
 const deleteProduct = (req, res) => {
@@ -140,5 +186,6 @@ module.exports = {
   getAllProducts,
   getProductById,
   updateProduct,
+  patchProduct,
   deleteProduct
 };

@@ -5,7 +5,8 @@
 const express = require('express');
 const productController = require('../controllers/product.controller');
 const { 
-  createProductValidator, 
+  createProductValidator,
+  patchProductValidator,
   validateProductId,
   handleValidationErrors 
 } = require('../validations/product.validation');
@@ -46,6 +47,17 @@ router.put(
   createProductValidator,
   handleValidationErrors,
   productController.updateProduct
+);
+
+/**
+ * PATCH /products/:id - Atualizar parcialmente um produto
+ */
+router.patch(
+  '/:id',
+  validateProductId,
+  patchProductValidator,
+  handleValidationErrors,
+  productController.patchProduct
 );
 
 /**

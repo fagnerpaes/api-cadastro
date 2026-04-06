@@ -312,6 +312,76 @@ specs.paths = {
         }
       }
     },
+    patch: {
+      summary: 'Atualizar parcialmente um produto',
+      tags: ['Produtos'],
+      description: 'Atualiza apenas os campos fornecidos de um produto existente, mantendo outros campos intactos.',
+      parameters: [
+        {
+          name: 'id',
+          in: 'path',
+          required: true,
+          description: 'ID único do produto',
+          schema: {
+            type: 'integer',
+            example: 1
+          }
+        }
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', minLength: 3 },
+                price: { type: 'number', minimum: 0.01 },
+                quantity: { type: 'integer', minimum: 0 },
+                category: { type: 'string' }
+              },
+              description: 'Pelo menos um campo deve ser fornecido'
+            },
+            example: {
+              price: 2199.99
+            }
+          }
+        }
+      },
+      responses: {
+        200: {
+          description: 'Produto atualizado parcialmente com sucesso',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: true },
+                  message: { type: 'string', example: 'Product updated successfully' },
+                  data: { $ref: '#/components/schemas/Product' }
+                }
+              }
+            }
+          }
+        },
+        400: {
+          description: 'Erro de validação',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ValidationError' }
+            }
+          }
+        },
+        404: {
+          description: 'Produto não encontrado',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Error' }
+            }
+          }
+        }
+      }
+    },
     delete: {
       summary: 'Deletar produto',
       tags: ['Produtos'],

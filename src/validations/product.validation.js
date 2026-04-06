@@ -26,6 +26,28 @@ const createProductValidator = [
 ];
 
 /**
+ * Middleware para validar atualização parcial de produto (PATCH)
+ * Todos os campos são opcionais, mas se enviados devem ser validados
+ */
+const patchProductValidator = [
+  body('name')
+    .optional()
+    .isLength({ min: 3 }).withMessage('Name must have at least 3 characters'),
+  
+  body('price')
+    .optional()
+    .isFloat({ min: 0.01 }).withMessage('Price must be greater than or equal to 0.01'),
+  
+  body('quantity')
+    .optional()
+    .isInt({ min: 0 }).withMessage('Quantity cannot be negative'),
+  
+  body('category')
+    .optional()
+    .isLength({ min: 1 }).withMessage('Category cannot be empty')
+];
+
+/**
  * Middleware para validar ID na URL
  */
 const validateProductId = [
@@ -57,6 +79,7 @@ const handleValidationErrors = (req, res, next) => {
 
 module.exports = {
   createProductValidator,
+  patchProductValidator,
   validateProductId,
   handleValidationErrors
 };
