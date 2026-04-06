@@ -14,8 +14,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Servidor de desenvolvimento'
+        url: '/',
+        description: 'Servidor de desenvolvimento (porta dinâmica)'
       }
     ],
     components: {
@@ -108,7 +108,7 @@ const specs = swaggerJsDoc(options);
 
 // Adicionando os endpoints manualmente
 specs.paths = {
-  '/products': {
+  '/api/products': {
     post: {
       summary: 'Criar novo produto',
       tags: ['Produtos'],
@@ -197,7 +197,7 @@ specs.paths = {
       }
     }
   },
-  '/products/{id}': {
+  '/api/products/{id}': {
     get: {
       summary: 'Obter produto por ID',
       tags: ['Produtos'],
