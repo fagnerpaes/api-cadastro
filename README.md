@@ -1557,3 +1557,249 @@ Para dúvidas ou problemas na execução da API, verifique:
 2. Se as dependências foram instaladas: `npm install`
 3. Se a porta 5000 está disponível
 4. Os logs da aplicação no terminal durante a execução
+
+---
+
+## 22. IMPLEMENTAÇÃO DO PATCH - CONCLUÍDA COM SUCESSO! (06/04/2026)
+
+### ✅ Status: PATCH Totalmente Funcional
+
+Implementado método **PATCH** para atualização parcial de produtos, completando o CRUD com todas as operações HTTP.
+
+---
+
+### 📋 **Arquivos Modificados**
+
+| Arquivo | Mudanças |
+|---------|----------|
+| `src/validations/product.validation.js` | ✅ Adicionado `patchProductValidator` com validações opcionais de campos |
+| `src/controllers/product.controller.js` | ✅ Adicionado método `patchProduct` com lógica de atualização parcial |
+| `src/routes/product.routes.js` | ✅ Adicionada rota `router.patch('/:id', ...)` |
+| `src/docs/swagger.js` | ✅ Documentado endpoint PATCH com exemplos e casos de uso |
+
+---
+
+### 🧪 **Testes Realizados (100% Sucesso!)**
+
+#### **✅ Teste 1: Criar Produto Base**
+```bash
+POST /api/products
+{
+  "name": "Smartphone Samsung",
+  "price": 1999.99,
+  "quantity": 20,
+  "category": "Eletrônicos"
+}
+```
+**Resposta**: `201 Created` com ID 1 ✓
+
+#### **✅ Teste 2: PATCH - Atualizar apenas preço**
+```bash
+PATCH /api/products/1
+{ "price": 1799.99 }
+```
+**Resultado**:
+- Price: 1999.99 → **1799.99** ✓
+- Name: Mantém "Smartphone Samsung" ✓
+- Quantity: Mantém 20 ✓
+- Category: Mantém "Eletrônicos" ✓
+
+#### **✅ Teste 3: PATCH - Atualizar múltiplos campos**
+```bash
+PATCH /api/products/1
+{ 
+  "quantity": 15, 
+  "category": "Eletrônicos Premium" 
+}
+```
+**Resultado**:
+- Quantity: 20 → **15** ✓
+- Category: "Eletrônicos" → **"Eletrônicos Premium"** ✓
+- Name: Mantém "Smartphone Samsung" ✓
+- Price: Mantém 1799.99 ✓
+
+#### **✅ Teste 4: Validação - Price inválido**
+```bash
+PATCH /api/products/1
+{ "price": -100 }
+```
+**Resposta**: `400 Bad Request` com mensagem de erro ✓
+
+#### **✅ Teste 5: Validação - Name muito curto**
+```bash
+PATCH /api/products/1
+{ "name": "AB" }
+```
+**Resposta**: `400 Bad Request`
+```json
+{
+  "success": false,
+  "message": "Validation error",
+  "errors": [{"message": "Name must have at least 3 characters"}]
+}
+```
+✓ Validação funcionando!
+
+#### **✅ Teste 6: Erro - Nenhum campo enviado**
+```bash
+PATCH /api/products/1
+{}
+```
+**Resposta**: `400 Bad Request`
+```json
+{ "success": false, "message": "At least one field must be provided for update" }
+```
+✓ Validação de campo vazio funcionando!
+
+#### **✅ Teste 7: Produto inexistente**
+```bash
+PATCH /api/products/999
+{ "price": 1000 }
+```
+**Resposta**: `404 Not Found` ✓
+
+#### **✅ Teste 8: Quantity negativa**
+```bash
+PATCH /api/products/1
+{ "quantity": -5 }
+```
+**Resposta**: `400 Bad Request` ✓
+
+---
+
+### 🚀 **Diferenças: PUT vs PATCH**
+
+| Aspecto | PUT | PATCH |
+|---------|-----|-------|
+| **Campos obrigatórios** | Sim (todos: name, price, quantity, category) | Não (nenhum é obrigatório) |
+| **Campos enviados** | Devem ser todos | Apenas os que há alteração |
+| **Campos não enviados** | Não devem estar no payload | Mantêm valores anteriores |
+| **Tipo de operação** | Substituição completa (full replacement) | Atualização parcial (partial update) |
+| **Validações** | Todos os campos validados | Apenas campos enviados são validados |
+
+**Exemplo PUT** (substituição completa):
+```bash
+PUT /api/products/1
+{
+  "name": "Novo Nome",
+  "price": 100,
+  "quantity": 5,
+  "category": "Nova Categoria"
+}
+```
+⚠️ Requer TODOS os campos
+
+**Exemplo PATCH** (atualização parcial):
+```bash
+PATCH /api/products/1
+{ "price": 100 }
+```
+✅ Apenas price é alterado, resto permanece intacto
+
+---
+
+### 📊 **Matriz de Endpoints CRUD Completo**
+
+| Método | Endpoint | Operação | Status | Teste |
+|--------|----------|----------|--------|-------|
+| `POST` | `/api/products` | Criar | ✅ Implementado | ✅ Passou |
+| `GET` | `/api/products` | Listar todos | ✅ Implementado | ✅ Passou |
+| `GET` | `/api/products/:id` | Obter por ID | ✅ Implementado | ✅ Passou |
+| `PUT` | `/api/products/:id` | Substituir completo | ✅ Implementado | ✅ Passou |
+| `PATCH` | `/api/products/:id` | Atualizar parcial | ✅ **NOVO** ✨ | ✅ Passou |
+| `DELETE` | `/api/products/:id` | Deletar | ✅ Implementado | ✅ Passou |
+
+---
+
+### 📖 **Acessar Documentação Swagger**
+
+A documentação completa do PATCH está disponível no Swagger:
+- **URL**: `http://localhost:5000/api/docs`
+- Busque por **"PATCH /api/products/{id}"**
+- Teste interativo disponível diretamente na interface
+
+**Exemplo no Swagger**:
+1. Expanda "PATCH /api/products/{id}"
+2. Clique em "Try it out"
+3. Preencha o ID: `1`
+4. Preencha o body: `{ "price": 1799.99 }`
+5. Clique "Execute"
+6. Veja a resposta 200 com o produto atualizado
+
+---
+
+### ✨ **Características Implementadas no PATCH**
+
+✅ Validação de campos opcionais com express-validator  
+✅ Atualização parcial mantendo campos intactos  
+✅ Mensagens de erro claras e objetivas  
+✅ Status HTTP apropriados (200, 400, 404)  
+✅ Verificação de produto existente  
+✅ Validação de pelo menos um campo obrigatório  
+✅ Documentação Swagger completa com exemplos  
+✅ Sem alterar métodos existentes (PUT, POST, GET, DELETE)  
+✅ Totalmente integrado ao projeto  
+✅ Commit e push no GitHub realizados  
+
+---
+
+### 🎯 **Casos de Uso do PATCH**
+
+**Cenário 1**: Atualizar apenas o preço
+```bash
+curl -X PATCH http://localhost:5000/api/products/1 \
+  -H "Content-Type: application/json" \
+  -d '{"price": 2999.99}'
+```
+
+**Cenário 2**: Ajustar estoque
+```bash
+curl -X PATCH http://localhost:5000/api/products/1 \
+  -H "Content-Type: application/json" \
+  -d '{"quantity": 50}'
+```
+
+**Cenário 3**: Atualizar categoria e quantidade
+```bash
+curl -X PATCH http://localhost:5000/api/products/1 \
+  -H "Content-Type: application/json" \
+  -d '{"category": "Premium", "quantity": 15}'
+```
+
+---
+
+### 🔍 **Validações Implementadas**
+
+| Campo | Validação | Valor Mínimo | Valor Máximo | Exemplos |
+|-------|-----------|--------------|--------------|----------|
+| `name` | String, min 3 chars | 3 | ∞ | "Notebook", "iPhone 15" |
+| `price` | Float, positivo | 0.01 | ∞ | 2999.99, 0.99 |
+| `quantity` | Integer, não negativo | 0 | ∞ | 0, 100, 1000 |
+| `category` | String, não vazio | 1 char | ∞ | "Eletrônicos", "A" |
+
+---
+
+### 📊 **Resumo de Status**
+
+- **CRUD Completo**: ✅ 6/6 operações implementadas
+- **Validações**: ✅ Todas as validações funcionando
+- **Testes**: ✅ 8+ cenários testados com sucesso
+- **Documentação**: ✅ Swagger atualizado
+- **GitHub**: ✅ Commit realizado e push concluído
+- **Porta**: ✅ Servidor rodando dinamicamente
+- **Production Ready**: ✅ Pronto para uso
+
+---
+
+### 🎉 **Conclusão**
+
+O método **PATCH** foi implementado com sucesso, adicionando a capacidade de **atualização parcial** de produtos à API. Agora a API oferece:
+
+- ✅ Criação de produtos (POST)
+- ✅ Listagem completa (GET)
+- ✅ Busca por ID (GET/:id)
+- ✅ Substituição completa (PUT)
+- ✅ **Atualização parcial (PATCH)** ← NOVO
+- ✅ Exclusão (DELETE)
+
+**Todos os endpoints estão totalmente funcionais, testados e documentados!** 🚀
