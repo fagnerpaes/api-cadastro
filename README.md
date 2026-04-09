@@ -306,12 +306,41 @@ No `package.json`, ajustar a seção de scripts para algo como:
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "mocha --recursive"
+    "test": "mocha --recursive --exit",
+    "test:ci": "mocha --recursive --exit"
   }
 }
 ```
 
-## 8.9 Fazer o primeiro commit
+## 8.9 Executar testes automatizados
+
+A suíte de testes foi implementada com `Mocha` e `Supertest` e cobre cenários de API positivos, negativos e de borda para o cadastro de produtos.
+
+Os principais casos testados são:
+
+- criação de produto válido
+- validação de campos obrigatórios (`name`, `price`, `quantity`, `category`)
+- valores de borda para `name`, `price`, `quantity` e `category`
+- listagem de produtos
+- consulta de produto por ID
+- atualização completa (`PUT`) e parcial (`PATCH`)
+- remoção de produto (`DELETE`)
+- erro para ID inválido e produto inexistente
+- disponibilidade de `/health` e `/api/docs/`
+
+Executar localmente com:
+
+```bash
+npm test
+```
+
+Executar em pipeline CI com:
+
+```bash
+npm run test:ci
+```
+
+## 8.10 Fazer o primeiro commit
 
 ```bash
 git add .
