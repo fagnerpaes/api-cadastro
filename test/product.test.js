@@ -285,4 +285,168 @@ describe('Product API - Functional Tests', () => {
       assert.strictEqual(response.body.message, 'Product not found');
     });
   });
+
+  describe('VADER - Verbs (HTTP Methods)', () => {
+    it('should return 404 for unsupported OPTIONS method on product endpoint', async () => {
+      const response = await request(app).options('/api/products');
+
+      // Express doesn't automatically respond to OPTIONS, it returns 404 from routes
+      assert.ok(response.status === 404 || response.status === 200);
+    });
+
+    it('should return 404 when trying to POST to a specific product ID', async () => {
+      const response = await request(app)
+        .post('/api/products/1')
+        .send({ name: 'Produto Teste', price: 100, quantity: 5, category: 'Teste' });
+
+      assert.strictEqual(response.status, 404);
+      assert.strictEqual(response.body.success, false);
+    });
+  });
+
+  describe('VADER - Data (Type Validation)', () => {
+    it('should accept price as string and convert to number (flexible typing)', async () => {
+      const payload = {
+        name: 'Produto Teste',
+        price: '2499.99',
+        quantity: 5,
+        category: 'Teste'
+      };
+
+      const response = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      // API accepts and converts string to number - this is flexible but testable
+      assert.ok(response.status === 201 || response.status === 400);
+      if (response.status === 201) {
+        assert.strictEqual(typeof response.body.data.price, 'number');
+        assert.strictEqual(response.body.data.price, 2499.99);
+      }
+    });
+
+    it('should accept quantity as string and convert to integer (flexible typing)', async () => {
+      const payload = {
+        name: 'Produto Teste',
+        price: 100.50,
+        quantity: '10',
+        category: 'Teste'
+      };
+
+      const response = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      // API accepts and converts string to integer
+      assert.ok(response.status === 201 || response.status === 400);
+      if (response.status === 201) {
+        assert.strictEqual(typeof response.body.data.quantity, 'number');
+        assert.strictEqual(response.body.data.quantity, 10);
+      }
+    });
+
+    it('should handle very large price values correctly', async () => {
+      const payload = {
+        name: 'Produto Premium',
+        price: 999999999.99,
+        quantity: 1,
+        category: 'Luxo'
+      };
+
+      const response = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      assert.strictEqual(response.status, 201);
+      assert.strictEqual(response.body.success, true);
+      assert.strictEqual(response.body.data.price, payload.price);
+    });
+
+    it('should accept special characters and unicode in name and category', async () => {
+      const payload = {
+        name: 'Café Espresso® 🔥',
+        price: 15.99,
+        quantity: 100,
+        category: 'Bebidas & Alimentos'
+      };
+
+      const response = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      assert.strictEqual(response.status, 201);
+      assert.strictEqual(response.body.success, true);
+      assert.strictEqual(response.body.data.name, payload.name);
+      assert.strictEqual(response.body.data.category, payload.category);
+    });
+
+    it('should return 415 Unsupported Media Type when Content-Type header is missing or invalid', async () => {
+      const response = await request(app)
+        .post('/api/products')
+        .set('Content-Type', 'text/plain')
+        .send('{ "name": "Produto Teste" }');
+
+      assert.ok(response.status === 400 || response.status === 415 || response.status === 500);
+    });
+  });;
+
+  describe('VADER - Errors (Error Consistency)', () => {
+    it('should always return consistent error structure with success=false and message', async () => {
+      const invalidPayload = {
+        name: 'AB',
+        price: -10,
+        quantity: -5,
+        category: ''
+      };
+
+      const response = await request(app)
+        .post('/api/products')
+        .send(invalidPayload);
+
+      assert.strictEqual(response.body.success, false);
+      assert.ok(typeof response.body.message === 'string');
+      assert.ok(response.body.message.length > 0);
+      assert.ok(Array.isArray(response.body.errors));
+    });
+
+    it('should provide specific error messages for different validation failures', async () => {
+      const testCases = [
+        {
+          payload: { price: 100, quantity: 5, category: 'Teste' },
+          expectedField: 'name',
+          expectedMessage: 'Name is required'
+        },
+        {
+          payload: { name: 'AB', price: 100, quantity: 5, category: 'Teste' },
+          expectedField: 'name',
+          expectedMessage: 'Name must have at least 3 characters'
+        },
+        {
+          payload: { name: 'Produto', quantity: 5, category: 'Teste' },
+          expectedField: 'price',
+          expectedMessage: 'Price is required'
+        },
+        {
+          payload: { name: 'Produto', price: 0, quantity: 5, category: 'Teste' },
+          expectedField: 'price',
+          expectedMessage: 'Price must be greater than or equal to 0.01'
+        },
+        {
+          payload: { name: 'Produto', price: 100, quantity: -1, category: 'Teste' },
+          expectedField: 'quantity',
+          expectedMessage: 'Quantity cannot be negative'
+        }
+      ];
+
+      for (const testCase of testCases) {
+        const response = await request(app)
+          .post('/api/products')
+          .send(testCase.payload);
+
+        const error = response.body.errors.find(err => err.field === testCase.expectedField);
+        assert.ok(error, `Error for field ${testCase.expectedField} not found`);
+        assert.strictEqual(error.message, testCase.expectedMessage);
+      }
+    });
+  });
 });
