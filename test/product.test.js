@@ -449,4 +449,112 @@ describe('Product API - Functional Tests', () => {
       }
     });
   });
+
+  describe('OWASP - XSS (Cross-Site Scripting)', () => {
+    it('should sanitize XSS payload in product name field (Stored XSS)', async () => {
+      const payload = {
+        name: '<script>alert("XSS")</script>Laptop',
+        price: 1500.00,
+        quantity: 5,
+        category: 'Eletrônicos'
+      };
+
+      const createResponse = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      assert.strictEqual(createResponse.status, 201);
+
+      const storedProduct = createResponse.body.data;
+      
+      // Validar que o nome armazenado não contém tags perigosas
+      assert.ok(!storedProduct.name.includes('<script>'), 'Product name contains <script> tag');
+      assert.ok(!storedProduct.name.includes('</script>'), 'Product name contains </script> tag');
+
+      // Recuperar e validar que XSS não persiste
+      const getResponse = await request(app)
+        .get(`/api/products/${storedProduct.id}`);
+
+      assert.strictEqual(getResponse.status, 200);
+      assert.ok(!getResponse.body.data.name.includes('<script>'), 'GET response contains <script> tag');
+    });
+
+    it('should sanitize XSS payload with event handlers in category field (Stored XSS)', async () => {
+      const payload = {
+        name: 'Monitor Samsung',
+        price: 800.00,
+        quantity: 20,
+        category: '<img src=x onerror="alert(\'XSS\')">'
+      };
+
+      const createResponse = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      assert.strictEqual(createResponse.status, 201);
+
+      const storedProduct = createResponse.body.data;
+
+      // Validar que não há atributos perigosos
+      assert.ok(!storedProduct.category.includes('onerror'), 'Category contains onerror handler');
+      assert.ok(!storedProduct.category.includes('onclick'), 'Category contains onclick handler');
+      assert.ok(!storedProduct.category.includes('<img'), 'Category contains <img tag');
+      assert.ok(!storedProduct.category.includes('onload'), 'Category contains onload handler');
+
+      // Verificar em listagem completa
+      const listResponse = await request(app).get('/api/products');
+      assert.strictEqual(listResponse.status, 200);
+      
+      const categoryField = listResponse.body.data.find(p => p.id === storedProduct.id);
+      assert.ok(categoryField, 'Product not found in list');
+      assert.ok(!categoryField.category.includes('onerror'), 'List response contains onerror handler');
+      assert.ok(!categoryField.category.includes('<img'), 'List response contains <img tag');
+    });
+
+    it('should escape HTML entities in response to prevent reflected XSS', async () => {
+      const payload = {
+        name: 'Produto<script>var x=1</script>Teste',
+        price: 99.99,
+        quantity: 10,
+        category: 'Teste<b onload="alert()">'
+      };
+
+      const createResponse = await request(app)
+        .post('/api/products')
+        .send(payload);
+
+      assert.strictEqual(createResponse.status, 201);
+
+      const responseBody = JSON.stringify(createResponse.body.data);
+
+      // Validar que a resposta não contém tags de script execução
+      assert.ok(
+        !responseBody.includes('<script>') &&
+        !responseBody.includes('</script>'),
+        'POST response contains <script> tags'
+      );
+
+      assert.ok(
+        !responseBody.includes('<b onload') &&
+        !responseBody.includes('onload='),
+        'POST response contains onload handler'
+      );
+
+      // Validar com GET também
+      const getId = createResponse.body.data.id;
+      const getResponse = await request(app).get(`/api/products/${getId}`);
+
+      assert.strictEqual(getResponse.status, 200);
+      assert.ok(
+        !getResponse.text.includes('<script>') &&
+        !getResponse.text.includes('</script>'),
+        'GET response contains <script> tags'
+      );
+
+      assert.ok(
+        !getResponse.text.includes('onload='),
+        'GET response contains dangerous event handler'
+      );
+    });
+  });
 });
